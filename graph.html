@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <title>Expense Tracker Graph</title>
+    <!-- Add Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <header>
+        <h2>Expense Tracker - Graphical Representation</h2>
+        <button onclick="window.location.href='index.html'">Back to Tracker</button> <!-- Button to go back -->
+    </header>
+
+    <div class="container">
+        <h3>Graphical Representation of Your Transactions</h3>
+        <canvas id="balanceChart" width="400" height="200"></canvas>
+    </div>
+
+    <script>
+        const localStorageTransactions = JSON.parse(
+            localStorage.getItem('transactions')
+        );
+
+        let transactions =
+            localStorage.getItem('transactions') !== null ? localStorageTransactions : [];
+
+        // Initialize or update the Line Chart
+        function updateChart() {
+            const cumulativeAmounts = transactions.map((t, index) => {
+                return transactions.slice(0, index + 1).reduce((sum, transaction) => sum + transaction.amount, 0);
+            });
+
+            const labels = transactions.map((_, index) => `Transaction ${index + 1}`);
+            const borderColors = transactions.map(transaction => transaction.amount > 0 ? '#2ecc71' : '#e74c3c');
+
+            const data = {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Balance Over Time',
+                        data: cumulativeAmounts,
+                        borderColor: borderColors,
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1
+                    }
+                ]
+            };
+
+            const config = {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            };
+
+            const chart = new Chart(document.getElementById('balanceChart'), config); // Create the chart instance
+        }
+
+        // Call updateChart function to render the graph
+        updateChart();
+    </script>
+</body>
+
+</html>
